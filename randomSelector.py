@@ -8,13 +8,20 @@ destination_dir = os.path.join(user_path, 'Podcasts', 'Phone')
 quantity = 5
 allowed_formats = ('.mp3', '.mp4')
 savefile = 'cache.json'
-verbose = False
+isVerbose = False
+
+def status_message(message, status=None, prefix="", suffix="", isDebug=False):
+    if (isVerbose and isDebug) or not isDebug:
+        if status is not None:
+            print(f"{prefix}[{status}] {message}{suffix}")
+        else:
+            print(f"{prefix}{message}{suffix}")
 
 def load_args():
     global working_dir
     global destination_dir
     global quantity
-    global verbose
+    global isVerbose
 
     # Initializer
     parser = argparse.ArgumentParser(description="Picks files randomly.")
@@ -42,13 +49,9 @@ def load_args():
         destination_dir = args.destination
 
     if args.verbose:
-        verbose = args.verbose
+        isVerbose = True
 
-def status_message(message, status=None, prefix="", suffix="", debug=False)
-        if status is not None:
-            print(f"{prefix}[{status}] {message}{suffix}")
-        else:
-            print(f"{prefix}{message}{suffix}")
+    status_message(f"Verbosity: {isVerbose}\nQuantity: {quantity}\nInput: {working_dir}\nDestination: {destination_dir}", isDebug=True)
 
 def pick_files(filelist, last_picks, quantity):
     picked_files = []
@@ -104,12 +107,15 @@ def load_data():
     return []
 
 def scan_dir(filelist):
+    """ Scan a directory if it hasn't been scanned before.
+    """
     listing = []
     status_message("Scanning destination directory...", status="scan")
+    status_message(f"Found {len(filelist)} files.", status="scan")
 
     for item in filelist:
         listing.append({ "filename": item, "score": 10 })
-        status_message(f"File: {filename}, score: 10", status="scan", debug=True)
+        status_message(f"File: {item}, score: 10", status="scan", isDebug=True)
 
     directory = {
         "directory_name": working_dir,
@@ -119,20 +125,21 @@ def scan_dir(filelist):
     return directory
 
 def main():
-    load_args()
-    filelist = os.listdir(working_dir)
+   load_args()
+   filelist = os.listdir(working_dir)
+   scan_dir(filelist)
 
-    if len(filelist) - 2 >= quantity:
-        last_picks = load_data()
-        valid_files = (len(filelist) - 2) - len(last_picks)
-        if valid_files >= quantity:
-            picked_files = pick_files(filelist, last_picks, quantity)
-            copy_files(picked_files)
+   # if len(filelist) - 2 >= quantity:
+   #     last_picks = load_data()
+   #     valid_files = (len(filelist) - 2) - len(last_picks)
+   #     if valid_files >= quantity:
+   #         picked_files = pick_files(filelist, last_picks, quantity)
+   #         copy_files(picked_files)
 
-            save_data(picked_files)
-        else:
-            print(f"Not enough files to pick in the directory, try asking for {valid_files} file(s).")
-    else:
-        print("Not enough files to pick in the directory...")
+   #         save_data(picked_files)
+   #     else:
+   #         print(f"Not enough files to pick in the directory, try asking for {valid_files} file(s).")
+   # else:
+   #     print("Not enough files to pick in the directory...")
 
 main()
