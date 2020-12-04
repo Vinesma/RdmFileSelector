@@ -1,3 +1,7 @@
+""" Picks files randomly, uses a scoring system to ensure files get a good rotation.
+    Currently picks any files in the directory.
+"""
+
 import os, shutil, random, json, sys, argparse
 
 user_path = os.path.expanduser('~')
@@ -6,7 +10,7 @@ input_directory = os.path.abspath('.')
 # Default values
 destination_dir = os.path.join(user_path, 'Podcasts', 'Phone')
 quantity = 5
-allowed_formats = ('.mp3', '.mp4')
+max_score = 15
 savefile = 'cache.json'
 isVerbose = False
 
@@ -90,7 +94,7 @@ def up_scores(directory):
     """ Should be called every run to increase all scores by one.
     """
     for directory_file in directory['files']:
-        if directory_file['score'] != 10:
+        if directory_file['score'] != max_score:
             directory_file['score'] += 1
             status_message(f"Increased the score of: {directory_file['filename']} to {directory_file['score']}", status="up scores", isDebug=True)
 
@@ -116,7 +120,7 @@ def scan_score(directory):
     picked_files = []
     count = 0
     isDone = False
-    prefer_score = 10
+    prefer_score = max_score
 
     if quantity > len(files):
         status_message(f"Directory does not have more than {quantity} files. Less files will be picked.")
@@ -167,6 +171,7 @@ def dir_is_updated(previous_directory):
 def update_dir(directory, directories):
     """ Update a directory's entry in the directories.
     """
+    status_message(f"Directory: {directory['directory_name']} has been changed. Updating...", status="update dir")
     isFound, index = find_dir(directory['directory_name'], directories)
     files = os.listdir(input_directory)
     if isFound:
@@ -180,7 +185,7 @@ def update_dir(directory, directories):
                         break
                 if not fileIsUpToDate:
                     status_message(f"New file found: {item}, Adding it with default score.", status="update dir", isDebug=True)
-                    directory['files'].append({ "filename": item, "score": 10 })
+                    directory['files'].append({ "filename": item, "score": max_score })
         else:
             deletedFiles = []
             for directory_file in directory['files']:
@@ -214,14 +219,15 @@ def add_dir(directory, directories):
 def scan_dir():
     """ Scan a directory if it hasn't been scanned before.
     """
+    status_message(f"Directory: {input_directory} has not yet been scanned.", status="scan dir")
     files = os.listdir(input_directory)
     aggregated = []
     status_message("Scanning destination directory...", status="scan")
     status_message(f"Found {len(files)} files.", status="scan")
 
     for item in files:
-        aggregated.append({ "filename": item, "score": 10 })
-        status_message(f"File: {item}, score: 10", status="scan", isDebug=True)
+        aggregated.append({ "filename": item, "score": max_score })
+        status_message(f"File: {item}, score: {max_score}", status="scan", isDebug=True)
 
     directory = {
         "directory_name": input_directory,
@@ -239,30 +245,19 @@ def main():
         directory = directories[index]
         up_scores(directory)
         if not dir_is_updated(directory):
-            status_message(f"Directory: {directory['directory_name']} has been changed. Updating now...", status="update dir", isDebug=True)
             directories = update_dir(directory, directories)
     else:
-        status_message(f"Directory: {input_directory} has not been found. Adding it...", status="not found")
         directory = scan_dir()
         directories = add_dir(directory, directories)
 
-    picked_files = scan_score(directory)
-    directory = lower_scores(picked_files, directory)
-    copy_files(picked_files)
+    # A quantity of less than 0 means that no files will be picked and only directory scans/updates will be done.
+    if quantity > 0:
+        picked_files = scan_score(directory)
+        directory = lower_scores(picked_files, directory)
+        copy_files(picked_files)
+    else:
+        status_message(f"Nothing to do.")
 
     save_data(directories)
-
-  # if len(files) - 2 >= quantity:
-  #     last_picks = load_data()
-  #     valid_files = (len(files) - 2) - len(last_picks)
-  #     if valid_files >= quantity:
-  #         picked_files = pick_files(files, last_picks, quantity)
-  #         copy_files(picked_files)
-
-  #         save_data(picked_files)
-  #     else:
-  #         print(f"Not enough files to pick in the directory, try asking for {valid_files} file(s).")
-  # else:
-  #     print("Not enough files to pick in the directory...")
 
 main()
