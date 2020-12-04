@@ -81,40 +81,64 @@ def load_data():
 def copy_files(files):
     """ Copy a list of files.
     """
-    for file in files:
-        print(f'Copying {file} to {destination_dir}')
-        filepath = os.path.join(input_directory, file)
+    for item in files:
+        status_message(f"Copying {item} to {destination_dir}", status="copy")
+        filepath = os.path.join(input_directory, item)
         shutil.copy(filepath, destination_dir)
-    print('\nDone!')
 
-def pick_files(files, last_picks, quantity):
-    """ Randomly pick a number of files from the directory.
+def up_scores(directory):
+    """ Should be called every run to increase all scores by one.
     """
+    for directory_file in directory['files']:
+        if directory_file['score'] != 10:
+            directory_file['score'] += 1
+            status_message(f"Increased the score of: {directory_file['filename']} to {directory_file['score']}", status="up scores", isDebug=True)
+
+    return directory
+
+def lower_scores(files, directory):
+    """ Lower to 0 the score of files that were picked.
+    """
+    for item in files:
+        for directory_file in directory['files']:
+            if item == directory_file['filename']:
+                status_message(f"Lowered the score of: {directory_file['filename']} to 0.", status="lower scores", isDebug=True)
+                directory_file['score'] = 0
+                break
+
+    return directory
+
+def scan_score(directory):
+    """ Shuffle the file list and pick the highest scores for files.
+    """
+    files = directory['files']
+    random.shuffle(files)
     picked_files = []
     count = 0
+    isDone = False
+    prefer_score = 10
 
-    while count < quantity:
-        random_int = random.randint(0, len(files) - 1)
-        file = files[random_int]
-        picked_before = False
+    if quantity > len(files):
+        status_message(f"Directory does not have more than {quantity} files. Less files will be picked.")
 
-        if file.endswith(allowed_formats):
-            if len(last_picks) > 0:
-                for item in last_picks:
-                    if item == file:
-                        picked_before = True
-                        break
-
-            if len(picked_files) > 0:
-                for item in picked_files:
-                    if item == file:
-                        picked_before = True
-                        break
-
-            if not picked_before:
-                print(f'{file} was picked!')
-                picked_files.append(file)
+    while not isDone:
+        status_message(f"Preffered score is now {prefer_score}", status="scan scores", isDebug=True)
+        for item in files:
+            if item['score'] == prefer_score:
+                status_message(f"Picked: {item['filename']}, with score: {item['score']}", status="scan scores", isDebug=True)
+                picked_files.append(item['filename'])
                 count += 1
+            if count == quantity:
+                status_message("Hit quantity limit.", status="scan scores", isDebug=True)
+                isDone = True
+                break
+        if prefer_score == 0 and not isDone:
+            status_message("Unable to hit quantity limit.", status="scan scores", isDebug=True)
+            isDone = True
+        elif prefer_score != 0 and not isDone:
+            prefer_score = prefer_score - 1
+        else:
+            isDone = True
 
     return picked_files
 
@@ -213,6 +237,7 @@ def main():
     isFound, index = find_dir(input_directory, directories)
     if isFound:
         directory = directories[index]
+        up_scores(directory)
         if not dir_is_updated(directory):
             status_message(f"Directory: {directory['directory_name']} has been changed. Updating now...", status="update dir", isDebug=True)
             directories = update_dir(directory, directories)
@@ -220,6 +245,10 @@ def main():
         status_message(f"Directory: {input_directory} has not been found. Adding it...", status="not found")
         directory = scan_dir()
         directories = add_dir(directory, directories)
+
+    picked_files = scan_score(directory)
+    directory = lower_scores(picked_files, directory)
+    copy_files(picked_files)
 
     save_data(directories)
 
