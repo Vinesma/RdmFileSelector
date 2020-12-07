@@ -2,26 +2,15 @@
     Currently picks any files in the directory.
 """
 
-import os, shutil, random, json, sys, argparse
-
-user_path = os.path.expanduser('~')
-input_directory = os.path.abspath('.')
+import os, shutil, random, json, sys, argparse, logging
 
 # Default values
+user_path = os.path.expanduser('~')
+input_directory = os.path.abspath('.')
 destination_dir = os.path.join(user_path, 'Podcasts', 'Phone')
 quantity = 5
 max_score = 15
 savefile = 'cache.json'
-isVerbose = False
-
-def status_message(message, status=None, prefix="", suffix="", isDebug=False):
-    """ Displays an optional status message to the user.
-    """
-    if (isVerbose and isDebug) or not isDebug:
-        if status is not None:
-            print(f"{prefix}[{status}] {message}{suffix}")
-        else:
-            print(f"{prefix}{message}{suffix}")
 
 def load_args():
     """ Parse and load arguments
@@ -29,7 +18,6 @@ def load_args():
     global input_directory
     global destination_dir
     global quantity
-    global isVerbose
 
     # Initializer
     parser = argparse.ArgumentParser(description="Picks files randomly.")
@@ -43,6 +31,11 @@ def load_args():
     args = parser.parse_args()
 
     # Loads arguments
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG, format="%(levelname)s : [%(funcName)s] %(message)s")
+    else:
+        logging.basicConfig(level=logging.INFO, format="%(levelname)s : [%(funcName)s] %(message)s")
+
     if args.quantity is not None:
         quantity = args.quantity
 
@@ -56,10 +49,9 @@ def load_args():
     elif args.destination is not None:
         destination_dir = args.destination
 
-    if args.verbose:
-        isVerbose = True
-
-    status_message(f"Verbosity: {isVerbose}\nQuantity: {quantity}\nInput: {input_directory}\nDestination: {destination_dir}", isDebug=True)
+    logging.debug(f"Quantity: {quantity}")
+    logging.debug(f"Input: {input_directory}")
+    logging.debug(f"Destination: {destination_dir}")
 
 def save_data(directories):
     """ Save directory data.
@@ -67,26 +59,26 @@ def save_data(directories):
     with open(savefile, 'w') as file:
         file.write(json.dumps(directories))
 
-    status_message("Save successful!", status="save")
+    logging.info("Save successful!")
 
 def load_data():
     """ Load saved data.
     """
     if os.path.isfile(savefile):
-        status_message("Savedata found!", status="load")
+        logging.info("Savedata found!")
         with open(savefile, 'r') as file:
             directories = json.load(file)
 
         return directories
 
-    status_message("No savedata found...", status="load")
+    logging.info("No savedata found...")
     return []
 
 def copy_files(files):
     """ Copy a list of files.
     """
     for item in files:
-        status_message(f"Copying {item} to {destination_dir}", status="copy")
+        logging.info(f"Copying {item} to {destination_dir}")
         filepath = os.path.join(input_directory, item)
         shutil.copy(filepath, destination_dir)
 
@@ -96,7 +88,7 @@ def up_scores(directory):
     for directory_file in directory['files']:
         if directory_file['score'] != max_score:
             directory_file['score'] += 1
-            status_message(f"Increased the score of: {directory_file['filename']} to {directory_file['score']}", status="up scores", isDebug=True)
+            logging.debug(f"Increased the score of: {directory_file['filename']} to {directory_file['score']}")
 
     return directory
 
@@ -106,7 +98,7 @@ def lower_scores(files, directory):
     for item in files:
         for directory_file in directory['files']:
             if item == directory_file['filename']:
-                status_message(f"Lowered the score of: {directory_file['filename']} to 0.", status="lower scores", isDebug=True)
+                logging.debug(f"Lowered the score of: {directory_file['filename']} to 0.")
                 directory_file['score'] = 0
                 break
 
@@ -123,21 +115,21 @@ def scan_score(directory):
     prefer_score = max_score
 
     if quantity > len(files):
-        status_message(f"Directory does not have more than {quantity} files. Less files will be picked.")
+        logging.info(f"Directory does not have more than {quantity} files. Less files will be picked.")
 
     while not isDone:
-        status_message(f"Preffered score is now {prefer_score}", status="scan scores", isDebug=True)
+        logging.debug(f"Preffered score is now {prefer_score}")
         for item in files:
             if item['score'] == prefer_score:
-                status_message(f"Picked: {item['filename']}, with score: {item['score']}", status="scan scores", isDebug=True)
+                logging.debug(f"Picked: {item['filename']}, with score: {item['score']}")
                 picked_files.append(item['filename'])
                 count += 1
             if count == quantity:
-                status_message("Hit quantity limit.", status="scan scores", isDebug=True)
+                logging.debug("Hit quantity limit.")
                 isDone = True
                 break
         if prefer_score == 0 and not isDone:
-            status_message("Unable to hit quantity limit.", status="scan scores", isDebug=True)
+            logging.debug("Unable to hit quantity limit.")
             isDone = True
         elif prefer_score != 0 and not isDone:
             prefer_score = prefer_score - 1
@@ -151,7 +143,7 @@ def find_dir(directory_name, directories):
     """
     for i, item in enumerate(directories):
         if item['directory_name'] == directory_name:
-            status_message(f"Directory: {directory_name} found at index {i}", status="find dir", isDebug=True)
+            logging.debug(f"Directory: {directory_name} found at index {i}")
             return (True, i)
 
     return (False, -1)
@@ -162,16 +154,16 @@ def dir_is_updated(previous_directory):
     previous_file_number = previous_directory['file_quantity']
     current_file_number = len(os.listdir(input_directory))
     if previous_file_number == current_file_number:
-        status_message("Directory is up to date!", status="dir is updated?", isDebug=True)
+        logging.debug("Directory is up to date!")
         return True
 
-    status_message("Directory is not up to date.", status="dir is updated?", isDebug=True)
+    logging.debug("Directory is not up to date.")
     return False
 
 def update_dir(directory, directories):
     """ Update a directory's entry in the directories.
     """
-    status_message(f"Directory: {directory['directory_name']} has been changed. Updating...", status="update dir")
+    logging.info(f"Directory: {directory['directory_name']} has been changed. Updating...")
     isFound, index = find_dir(directory['directory_name'], directories)
     files = os.listdir(input_directory)
     if isFound:
@@ -179,19 +171,19 @@ def update_dir(directory, directories):
             for item in files:
                 fileIsUpToDate = False
                 for directory_file in directory['files']:
-                    status_message(f"Comparing: {item} with: {directory_file['filename']}", status="update_dir", isDebug=True)
+                    logging.debug(f"Comparing: {item} with: {directory_file['filename']}")
                     if item == directory_file['filename']:
                         fileIsUpToDate = True
                         break
                 if not fileIsUpToDate:
-                    status_message(f"New file found: {item}, Adding it with default score.", status="update dir", isDebug=True)
+                    logging.debug(f"New file found: {item}, Adding it with default score.")
                     directory['files'].append({ "filename": item, "score": max_score })
         else:
             deletedFiles = []
             for directory_file in directory['files']:
                 fileHasBeenDeleted = True
                 for item in files:
-                    status_message(f"Comparing: {directory_file['filename']} with: {item}", status="update_dir", isDebug=True)
+                    logging.debug(f"Comparing: {directory_file['filename']} with: {item}")
                     if directory_file['filename'] == item:
                         fileHasBeenDeleted = False
                         break
@@ -199,19 +191,19 @@ def update_dir(directory, directories):
                     deletedFiles.append(directory_file)
 
             for removed_file in deletedFiles:
-                status_message(f"File not found: {removed_file['filename']}, Removing entry.", status="update dir", isDebug=True)
+                logging.debug(f"File not found: {removed_file['filename']}, Removing entry.")
                 directory['files'].remove(removed_file)
 
         directory['file_quantity'] = len(directory['files'])
         directories[index] = directory
-        status_message(f"Updated directory {directory['directory_name']} in cache.", status="update dir", isDebug=True)
+        logging.debug(f"Updated directory {directory['directory_name']} in cache.")
 
     return directories
 
 def add_dir(directory, directories):
     """ Add a directory to the directories.
     """
-    status_message(f"Adding directory: {directory['directory_name']}", status="add directory", isDebug=True)
+    logging.debug(f"Adding directory: {directory['directory_name']}")
     directories.append(directory)
 
     return directories
@@ -219,15 +211,15 @@ def add_dir(directory, directories):
 def scan_dir():
     """ Scan a directory if it hasn't been scanned before.
     """
-    status_message(f"Directory: {input_directory} has not yet been scanned.", status="scan dir")
+    logging.info(f"Directory: {input_directory} has not yet been scanned.")
     files = os.listdir(input_directory)
     aggregated = []
-    status_message("Scanning destination directory...", status="scan")
-    status_message(f"Found {len(files)} files.", status="scan")
+    logging.info("Scanning destination directory...")
+    logging.info(f"Found {len(files)} files.")
 
     for item in files:
         aggregated.append({ "filename": item, "score": max_score })
-        status_message(f"File: {item}, score: {max_score}", status="scan", isDebug=True)
+        logging.debug(f"File: {item}, score: {max_score}")
 
     directory = {
         "directory_name": input_directory,
@@ -256,7 +248,7 @@ def main():
         directory = lower_scores(picked_files, directory)
         copy_files(picked_files)
     else:
-        status_message(f"Nothing to do.")
+        print("Nothing to do.")
 
     save_data(directories)
 
