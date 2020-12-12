@@ -23,18 +23,18 @@ def load_args():
     parser = argparse.ArgumentParser(description="Picks files randomly.")
     # Argument definition
     # optional
-    parser.add_argument("-q", "--quantity", type=int, help="How many files to pick from the input directory.")
-    parser.add_argument("-i", "--input", help="Place to select the files from.")
-    parser.add_argument("-v", "--verbose", help="Control amount of output.", action="store_true")
+    parser.add_argument("-q", "--quantity", type=int, help="how many files to pick from the input directory.")
+    parser.add_argument("-i", "--input", help="where to select the files from.")
+    parser.add_argument("-v", "--verbose", help="make the application more verbose.", action="store_true")
     # positional
-    parser.add_argument("destination", help="Place to put the randomly picked files.")
+    parser.add_argument("destination", help="where to put the randomly picked files.")
     args = parser.parse_args()
 
     # Loads arguments
     if args.verbose:
-        logging.basicConfig(level=logging.DEBUG, format="%(levelname)s : [%(funcName)s] %(message)s")
+        logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: [%(funcName)s] %(message)s")
     else:
-        logging.basicConfig(level=logging.INFO, format="%(levelname)s : [%(funcName)s] %(message)s")
+        logging.basicConfig(level=logging.INFO, format="%(levelname)s: [%(funcName)s] %(message)s")
 
     if args.quantity is not None:
         quantity = args.quantity
