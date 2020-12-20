@@ -171,19 +171,17 @@ def update_dir(directory, directories):
             for item in files:
                 fileIsUpToDate = False
                 for directory_file in directory['files']:
-                    logging.debug(f"Comparing: {item} with: {directory_file['filename']}")
                     if item == directory_file['filename']:
                         fileIsUpToDate = True
                         break
                 if not fileIsUpToDate:
-                    logging.debug(f"New file found: {item}, Adding it with default score.")
+                    logging.debug(f"New file found: `{item}`, Adding it with default score.")
                     directory['files'].append({ "filename": item, "score": max_score })
         else:
             deletedFiles = []
             for directory_file in directory['files']:
                 fileHasBeenDeleted = True
                 for item in files:
-                    logging.debug(f"Comparing: {directory_file['filename']} with: {item}")
                     if directory_file['filename'] == item:
                         fileHasBeenDeleted = False
                         break
@@ -191,7 +189,7 @@ def update_dir(directory, directories):
                     deletedFiles.append(directory_file)
 
             for removed_file in deletedFiles:
-                logging.debug(f"File not found: {removed_file['filename']}, Removing entry.")
+                logging.debug(f"File not found: `{removed_file['filename']}`, Removing entry.")
                 directory['files'].remove(removed_file)
 
         directory['file_quantity'] = len(directory['files'])
@@ -242,12 +240,12 @@ def main():
         directory = scan_dir()
         directories = add_dir(directory, directories)
 
-    # A quantity of less than 0 means that no files will be picked and only directory scans/updates will be done.
     if quantity > 0:
         picked_files = scan_score(directory)
         directory = lower_scores(picked_files, directory)
         copy_files(picked_files)
     else:
+        # A quantity of less than 0 means that no files will be picked and only directory scans/updates will be done.
         print("Nothing to do.")
 
     save_data(directories)
