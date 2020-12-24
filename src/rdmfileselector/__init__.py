@@ -8,6 +8,7 @@ import os, shutil, random, json, sys, argparse, logging
 user_path = os.path.expanduser('~')
 input_directory = os.path.abspath('.')
 destination_dir = os.path.join(user_path, 'Podcasts', 'Phone')
+save_dir = os.path.join(user_path, '.cache', 'rdmfileselector')
 quantity = 5
 max_score = 15
 savefile = 'cache.json'
@@ -56,7 +57,10 @@ def load_args():
 def save_data(directories):
     """ Save directory data.
     """
-    with open(savefile, 'w') as file:
+    if not os.path.isdir(save_dir):
+        os.mkdir(save_dir)
+
+    with open(os.path.join(save_dir, savefile), 'w') as file:
         file.write(json.dumps(directories))
 
     logging.info("Save successful!")
@@ -64,7 +68,7 @@ def save_data(directories):
 def load_data():
     """ Load saved data.
     """
-    if os.path.isfile(savefile):
+    if os.path.isfile(os.path.join(save_dir, savefile)):
         logging.info("Savedata found!")
         with open(savefile, 'r') as file:
             directories = json.load(file)
@@ -250,4 +254,5 @@ def main():
 
     save_data(directories)
 
-main()
+if __name__ == "__main__":
+    main()
