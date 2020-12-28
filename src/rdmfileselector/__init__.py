@@ -35,7 +35,7 @@ def load_args():
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: [%(funcName)s] %(message)s")
     else:
-        logging.basicConfig(level=logging.INFO, format="%(levelname)s: [%(funcName)s] %(message)s")
+        logging.basicConfig(level=logging.INFO, format="%(levelname)s:  [%(funcName)s] %(message)s")
 
     if args.quantity is not None:
         quantity = args.quantity
@@ -70,8 +70,8 @@ def load_data():
     """
     if os.path.isfile(os.path.join(save_dir, savefile)):
         logging.info("Savedata found!")
-        with open(savefile, 'r') as file:
-            directories = json.load(file)
+        with open(os.path.join(save_dir, savefile), 'r') as cacheFile:
+            directories = json.load(cacheFile)
 
         return directories
 
