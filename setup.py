@@ -9,17 +9,17 @@ setup(
     description="Randomly selects files and copies them to a destination, in a way that's less likely to pick previous files.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    version="1.0.0",
+    version="1.0.5",
     url="https://github.com/Vinesma/rdm-file-selector",
     author="Otavio Cornelio",
     author_email="vinesma.work@gmail.com",
-    license="GPL",
-    scripts=["scripts/rdmfileselector"],
+    license="MIT",
+    scripts=["scripts/rdm-file-selector"],
     packages=find_packages("src"),
     package_dir={'': 'src'},
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: GPL 3.0 License"
+        "License :: OSI Approved :: MIT License"
     ],
     install_requires=[]
 )
