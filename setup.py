@@ -5,7 +5,7 @@ with open("./README.md", "r") as readme:
     long_description = readme.read()
 
 setup(
-    name="rdmfileselector",
+    name="rdm-file-selector",
     description="Randomly selects files and copies them to a destination, in a way that's less likely to pick previous files.",
     long_description=long_description,
     long_description_content_type="text/markdown",
