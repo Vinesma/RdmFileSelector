@@ -18,7 +18,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import os, shutil, random, json, sys, argparse, logging
+import os, shutil, random, json, argparse, logging
 
 # Default values
 user_path = os.path.expanduser('~')
@@ -35,6 +35,7 @@ def load_args():
     global input_directory
     global destination_dir
     global quantity
+    global save_dir
 
     # Initializer
     parser = argparse.ArgumentParser(description="Picks files randomly.")
@@ -43,6 +44,7 @@ def load_args():
     parser.add_argument("-q", "--quantity", type=int, help="how many files to pick from the input directory.")
     parser.add_argument("-i", "--input", help="where to select the files from.")
     parser.add_argument("-v", "--verbose", help="make the application more verbose.", action="store_true")
+    parser.add_argument("-c", "--cache", help="Use a different directory for the cache file.")
     # positional
     parser.add_argument("destination", help="where to put the randomly picked files.")
     args = parser.parse_args()
@@ -65,6 +67,9 @@ def load_args():
         destination_dir = os.path.expanduser(args.destination)
     elif args.destination is not None:
         destination_dir = os.path.abspath(args.destination)
+
+    if args.cache is not None:
+        save_dir = os.path.expanduser(args.cache)
 
     logging.debug(f"Quantity: {quantity}")
     logging.debug(f"Input: {input_directory}")
