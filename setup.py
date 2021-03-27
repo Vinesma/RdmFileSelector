@@ -9,7 +9,7 @@ setup(
     description="Randomly selects files and copies them to a destination, in a way that's less likely to pick previous files.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    version="1.0.6",
+    version="1.0.7",
     url="https://github.com/Vinesma/rdm-file-selector",
     author="Otavio Cornelio",
     author_email="vinesma.work@gmail.com",
