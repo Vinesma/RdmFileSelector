@@ -26,7 +26,7 @@ input_directory = os.path.abspath('.')
 destination_dir = os.path.join(user_path, 'Podcasts', 'Phone')
 save_dir = os.path.join(user_path, '.cache', 'rdmfileselector')
 quantity = 5
-max_score = 15
+max_score = 30
 max_files = 100
 savefile = 'cache.json'
 
