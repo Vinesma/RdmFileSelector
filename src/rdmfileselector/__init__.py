@@ -27,6 +27,7 @@ destination_dir = os.path.join(user_path, 'Podcasts', 'Phone')
 save_dir = os.path.join(user_path, '.cache', 'rdmfileselector')
 quantity = 5
 max_score = 15
+max_files = 100
 savefile = 'cache.json'
 
 def load_args():
@@ -36,6 +37,7 @@ def load_args():
     global destination_dir
     global quantity
     global save_dir
+    global max_files
 
     # Initializer
     parser = argparse.ArgumentParser(description="Picks files randomly.")
@@ -44,7 +46,8 @@ def load_args():
     parser.add_argument("-q", "--quantity", type=int, help="how many files to pick from the input directory.")
     parser.add_argument("-i", "--input", help="where to select the files from.")
     parser.add_argument("-v", "--verbose", help="make the application more verbose.", action="store_true")
-    parser.add_argument("-c", "--cache", help="Use a different directory for the cache file.")
+    parser.add_argument("-c", "--cache", help="use a different directory for the cache file.")
+    parser.add_argument("-o", "--condition", type=int, help="only proceed if there are less files in the dir than the chosen parameter.")
     # positional
     parser.add_argument("destination", help="where to put the randomly picked files.")
     args = parser.parse_args()
@@ -70,6 +73,9 @@ def load_args():
 
     if args.cache is not None:
         save_dir = os.path.expanduser(args.cache)
+    
+    if args.condition is not None:
+        max_files = args.condition
 
     logging.debug(f"Quantity: {quantity}")
     logging.debug(f"Input: {input_directory}")
@@ -252,28 +258,41 @@ def scan_dir():
 
     return directory
 
+def excess_files_in_dir():
+    files = os.listdir(destination_dir)
+    logging.debug(f"Destination has {len(files)} files. Limit is {max_files} files.")
+
+    if len(files) < max_files:
+        return False
+
+    return True
+
 def main():
     load_args()
-    directories = load_data()
-    isFound, index = find_dir(input_directory, directories)
-    if isFound:
-        directory = directories[index]
-        up_scores(directory)
-        if not dir_is_updated(directory):
-            directories = update_dir(directory, directories)
-    else:
-        directory = scan_dir()
-        directories = add_dir(directory, directories)
 
-    if quantity > 0:
-        picked_files = scan_score(directory)
-        directory = lower_scores(picked_files, directory)
-        copy_files(picked_files)
+    if excess_files_in_dir():
+        print("Destination directory has too many files, aborting.")
     else:
-        # A quantity of less than 0 means that no files will be picked and only directory scans/updates will be done.
-        print("Nothing to do.")
+        directories = load_data()
+        isFound, index = find_dir(input_directory, directories)
+        if isFound:
+            directory = directories[index]
+            up_scores(directory)
+            if not dir_is_updated(directory):
+                directories = update_dir(directory, directories)
+        else:
+            directory = scan_dir()
+            directories = add_dir(directory, directories)
 
-    save_data(directories)
+        if quantity > 0:
+            picked_files = scan_score(directory)
+            directory = lower_scores(picked_files, directory)
+            copy_files(picked_files)
+        else:
+            # A quantity of less than 0 means that no files will be picked and only directory scans/updates will be done.
+            print("Nothing to do.")
+
+        save_data(directories)
 
 if __name__ == "__main__":
     main()
