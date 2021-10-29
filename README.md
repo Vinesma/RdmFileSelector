@@ -15,4 +15,5 @@ Pass the `--help` flag to the script to learn the options available.
 ### TODO
 
 Handle directories inside directories better
+
 More options to use
