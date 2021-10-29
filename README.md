@@ -10,3 +10,9 @@ The script saves everything to a cache file, and remembers each directory as it 
 ### How to use
 
 Pass the `--help` flag to the script to learn the options available.
+
+
+### TODO
+
+Handle directories inside directories better
+More options to use
