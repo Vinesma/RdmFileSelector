@@ -1,7 +1,7 @@
 import shutil, logging
 from os import path
 
-class File:
+class File():
     """ Represents one file.
     """
     
@@ -16,13 +16,21 @@ class File:
             score = self.max_score
 
         self.score = score
+    
+    def __dict__(self):
+        return {
+            "name": self.name,
+            "score": self.score
+        }
 
     def copy(self, dir_to):
         """ Copy this file from one place to another.
+            Automatically decreases the score.
         """
 
         logging.info(f"Copying {self.name} to {dir_to}")
         shutil.copy(self.path, dir_to)
+        self._score_decrease()
 
     def score_increase(self):
         """ Increase file score by one.
@@ -32,18 +40,9 @@ class File:
             self.score += 1
             logging.debug(f"Increased the score of '{self.name}' to {self.score}")
 
-    def score_decrease(self):
+    def _score_decrease(self):
         """ Decrease file score to lowest possible.
         """
 
         self.score = 0
         logging.debug(f"Lowered the score of '{self.name}' to {self.score}.")
-    
-    def to_dict(self):
-        """ Return a dictionary version of this instance.
-        """
-        
-        return {
-            "name": self.name,
-            "score": self.score
-        }

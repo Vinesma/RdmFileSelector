@@ -2,8 +2,9 @@ import logging
 from rdmfileselector.classes.file import File
 from os import listdir
 from random import sample
+from json import JSONEncoder
 
-class Directory:
+class Directory(JSONEncoder):
     """ Represents one directory
     """
     
@@ -21,6 +22,18 @@ class Directory:
 
         self.files = file_list
         self.path = path
+    
+    def __len__():
+        return len(self.files)
+
+    def __dict__(self):
+        return {
+            "path": self.path,
+            "files": [_file.__dict__() for _file in self.files]
+        }
+
+    def default(self, object):
+        return object.__dict__
     
     def increase_all_file_scores(self):
         """ Increase score for all files in this directory.
@@ -83,7 +96,6 @@ class Directory:
                 if _file.score == prefer_score:
                     logging.debug(f"Picked '{_file.name}' with score: {_file.score}")
                     _file.copy(dir_to)
-                    _file.score_decrease()
                     count += 1
                 
                 if count == quantity:
@@ -99,15 +111,6 @@ class Directory:
             else:
                 done = True
         
-    def to_dict(self):
-        """ Return a dictionary version of this instance.
-        """
-
-        return {
-            "path": self.path,
-            "files": [_file.to_dict() for _file in self.files]
-        }
-    
     @staticmethod
     def find(directory_path, directories):
         """ Return the index of a directory in a list of directories by the path.

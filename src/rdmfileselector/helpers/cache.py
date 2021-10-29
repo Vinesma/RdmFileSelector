@@ -9,13 +9,11 @@ class Cache:
         self.file_cache = file_cache
     
     def save(self, directories):
-        directories_dict = [directory.to_dict() for directory in directories]
-
         if not os.path.isdir(self.dir_cache):
             os.mkdir(self.dir_cache)
 
         with open(os.path.join(self.dir_cache, self.file_cache), 'w') as _file:
-            _file.write(json.dumps(directories_dict))
+            _file.write(json.dumps(directories, cls=Directory))
 
         logging.info("Save to cache successful!")
         

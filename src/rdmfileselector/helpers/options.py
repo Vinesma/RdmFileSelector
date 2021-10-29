@@ -35,7 +35,7 @@ class Options:
         if args.quantity is not None:
             self.quantity = args.quantity
 
-        if args.input.startswith('~', 0, 1):
+        if args.input is not None and args.input.startswith('~', 0, 1):
             self.dir_input = os.path.expanduser(args.input)
         elif args.input is not None:
             self.dir_input = os.path.abspath(args.input)

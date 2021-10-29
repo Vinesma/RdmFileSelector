@@ -46,8 +46,7 @@ def main():
             directory = Directory.scan(options.dir_input)
 
             logging.debug(f"Adding directory: {directory.path}")
-            directories = [*directories, directory]
-
+            directories.append(directory)
         if options.quantity > 0:
             directory.pick_random(options.quantity, options.dir_destination)
         else:
