@@ -5,13 +5,13 @@ import shutil
 import logging
 from os import path
 
-class File():
-    """ Represents one file.
-    """
+
+class File:
+    """Represents one file."""
 
     MAX_SCORE = 30
 
-    def __init__(self, path_directory, name, score = None):
+    def __init__(self, path_directory, name, score=None):
         self.path_directory = path_directory
         self.name = name
         self.path = path.join(self.path_directory, self.name)
@@ -22,14 +22,11 @@ class File():
         self.score = score
 
     def __dict__(self):
-        return {
-            "name": self.name,
-            "score": self.score
-        }
+        return {"name": self.name, "score": self.score}
 
     def copy(self, dir_to):
-        """ Copy this file from one place to another.
-            Automatically decreases the score.
+        """Copy this file from one place to another.
+        Automatically decreases the score.
         """
 
         logging.info(f"Copying {self.name} to {dir_to}")
@@ -37,16 +34,14 @@ class File():
         self._score_decrease()
 
     def score_increase(self):
-        """ Increase file score by one.
-        """
+        """Increase file score by one."""
 
         if self.score < self.MAX_SCORE:
             self.score += 1
             logging.debug(f"Increased the score of '{self.name}' to {self.score}")
 
     def _score_decrease(self):
-        """ Decrease file score to lowest possible.
-        """
+        """Decrease file score to lowest possible."""
 
         self.score = 0
         logging.debug(f"Lowered the score of '{self.name}' to {self.score}.")

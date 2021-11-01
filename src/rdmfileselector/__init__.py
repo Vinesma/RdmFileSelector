@@ -25,9 +25,9 @@ from rdmfileselector.classes.directory import Directory
 
 options = Options()
 
+
 def main():
-    """ Start here
-    """
+    """Start here"""
     cache = Cache(options.dir_cache, options.file_cache)
 
     if Directory.has_excess_files_in_dir(options.dir_destination, options.max_files):
@@ -57,6 +57,7 @@ def main():
             print("Doing nothing because quantity is < 1")
 
         cache.save(directories)
+
 
 if __name__ == "__main__":
     main()
