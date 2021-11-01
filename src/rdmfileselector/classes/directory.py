@@ -1,13 +1,16 @@
+""" Deal with directories in the context of this application.
+"""
+
 import logging
-from rdmfileselector.classes.file import File
 from os import listdir
 from random import sample
 from json import JSONEncoder
+from rdmfileselector.classes.file import File
 
 class Directory(JSONEncoder):
     """ Represents one directory
     """
-    
+
     def __init__(self, path, files = None):
         if files is None:
             file_list = []
@@ -22,8 +25,8 @@ class Directory(JSONEncoder):
 
         self.files = file_list
         self.path = path
-    
-    def __len__():
+
+    def __len__(self):
         return len(self.files)
 
     def __dict__(self):
@@ -32,30 +35,30 @@ class Directory(JSONEncoder):
             "files": [_file.__dict__() for _file in self.files]
         }
 
-    def default(self, object):
+    def default(self, o):
         return object.__dict__
-    
+
     def increase_all_file_scores(self):
         """ Increase score for all files in this directory.
         """
 
         for _file in self.files:
             _file.score_increase()
-    
+
     def has_changed(self):
         """ Determine if a directory has changed since the last time.
         """
 
         files_now = len(listdir(self.path))
         files_before = len(self.files)
-        
+
         if files_now == files_before:
             logging.debug("Directory is up to date!")
             return False
-        else:
-            logging.debug("Directory is NOT up to date!")
-            return True
-    
+
+        logging.debug("Directory is NOT up to date!")
+        return True
+
     def update(self):
         """ Update this directory with new files.
         """
@@ -67,28 +70,34 @@ class Directory(JSONEncoder):
             # Find which files are new by filtering out filenames that already exist
             new_files = [
                 File(self.path, _file)
-                for _file in list(filter(lambda file_name: file_name not in cache_file_names, file_names))
+                for _file in list(
+                    filter(lambda file_name: file_name not in cache_file_names, file_names)
+                )
             ]
             self.files = [*self.files, *new_files]
         else:
             logging.info("Some files were removed since last time.")
             # Find which files were removed by singling out names that don't exist anymore
-            removed_files = list(filter(lambda file_name: file_name not in file_names, cache_file_names))
+            removed_files = list(
+                filter(lambda file_name: file_name not in file_names, cache_file_names)
+            )
             self.files = list(filter(lambda _file: _file.name not in removed_files, self.files))
-        
-        logging.debug(f"Updated directory: '{self.path}'")
-    
+
+        logging.debug("Updated directory: '%s'", self.path)
+
     def pick_random(self, quantity, dir_to):
         """ Select files at random and copy them somewhere else.
         """
 
         shuffled_files = sample(self.files, len(self.files))
-        prefer_score = File.max_score
+        prefer_score = File.MAX_SCORE
         count = 0
         done = False
-        
+
         if quantity > len(shuffled_files):
-            logging.info(f"Directory only has {len(shuffled_files)}, less than asked ({quantity}). Less files will be picked.")
+            logging.info(
+                f"Directory only has {len(shuffled_files)}, less than asked ({quantity}). Less files will be picked."
+            )
 
         while not done:
             logging.debug(f'Preferred score is now {prefer_score}')
@@ -97,7 +106,7 @@ class Directory(JSONEncoder):
                     logging.debug(f"Picked '{_file.name}' with score: {_file.score}")
                     _file.copy(dir_to)
                     count += 1
-                
+
                 if count == quantity:
                     logging.info("Hit quantity limit.")
                     done = True
@@ -110,7 +119,7 @@ class Directory(JSONEncoder):
                 prefer_score -= 1
             else:
                 done = True
-        
+
     @staticmethod
     def find(directory_path, directories):
         """ Return the index of a directory in a list of directories by the path.
@@ -121,9 +130,9 @@ class Directory(JSONEncoder):
             if directory.path == directory_path:
                 logging.debug(f"Directory '{directory_path}' found at index {index}")
                 return index
-        
+
         return -1
-        
+
     @staticmethod
     def scan(directory_path):
         """ Scan a directory.

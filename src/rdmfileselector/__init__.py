@@ -21,11 +21,13 @@ SOFTWARE.
 import logging
 from rdmfileselector.helpers.cache import Cache
 from rdmfileselector.helpers.options import Options
-from rdmfileselector.classes.directory import Directory 
+from rdmfileselector.classes.directory import Directory
 
 options = Options()
 
 def main():
+    """ Start here
+    """
     cache = Cache(options.dir_cache, options.file_cache)
 
     if Directory.has_excess_files_in_dir(options.dir_destination, options.max_files):
@@ -50,7 +52,8 @@ def main():
         if options.quantity > 0:
             directory.pick_random(options.quantity, options.dir_destination)
         else:
-            # A quantity of less than 1 means that no files will be picked and only directory scans/updates will be done.
+            # A quantity of less than 1 means that no files will be picked and
+            # only directory scans/updates will be done.
             print("Doing nothing because quantity is < 1")
 
         cache.save(directories)

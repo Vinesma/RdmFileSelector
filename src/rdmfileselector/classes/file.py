@@ -1,11 +1,15 @@
-import shutil, logging
+""" Handle scored files in this application's context.
+"""
+
+import shutil
+import logging
 from os import path
 
 class File():
     """ Represents one file.
     """
-    
-    max_score = 30
+
+    MAX_SCORE = 30
 
     def __init__(self, path_directory, name, score = None):
         self.path_directory = path_directory
@@ -13,10 +17,10 @@ class File():
         self.path = path.join(self.path_directory, self.name)
 
         if score is None:
-            score = self.max_score
+            score = self.MAX_SCORE
 
         self.score = score
-    
+
     def __dict__(self):
         return {
             "name": self.name,
@@ -36,7 +40,7 @@ class File():
         """ Increase file score by one.
         """
 
-        if (self.score < self.max_score):
+        if self.score < self.MAX_SCORE:
             self.score += 1
             logging.debug(f"Increased the score of '{self.name}' to {self.score}")
 

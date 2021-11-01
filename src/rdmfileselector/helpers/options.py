@@ -1,4 +1,9 @@
-import argparse, logging, os
+""" Parsing of arguments and providing options to the rest of the application.
+"""
+
+import logging
+import os
+import argparse
 
 class Options:
     """ Initialize argument based options and logging.
@@ -17,20 +22,33 @@ class Options:
         parser = argparse.ArgumentParser(description="Picks files randomly.")
         # Argument definition
         # optional
-        parser.add_argument("-q", "--quantity", type=int, help="how many files to pick from the input directory.")
+        parser.add_argument(
+            "-q", "--quantity", type=int, help="how many files to pick from the input directory."
+        )
         parser.add_argument("-i", "--input", help="where to select the files from.")
-        parser.add_argument("-v", "--verbose", help="make the application more verbose.", action="store_true")
+        parser.add_argument(
+            "-v", "--verbose", help="make the application more verbose.", action="store_true"
+        )
         parser.add_argument("-c", "--cache", help="use a different directory for the cache file.")
-        parser.add_argument("-o", "--condition", type=int, help="only proceed if there are less files in the dir than the chosen parameter.")
+        parser.add_argument(
+            "-o",
+            "--condition",
+            type=int,
+            help="only proceed if there are less files in the dir than the chosen parameter."
+        )
         # positional
         parser.add_argument("destination", help="where to put the randomly picked files.")
         args = parser.parse_args()
 
         # Loads arguments
         if args.verbose:
-            logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: [%(funcName)s] %(message)s")
+            logging.basicConfig(
+                level=logging.DEBUG, format="%(levelname)s: [%(funcName)s] %(message)s"
+            )
         else:
-            logging.basicConfig(level=logging.INFO, format="%(levelname)s:  [%(funcName)s] %(message)s")
+            logging.basicConfig(
+                level=logging.INFO, format="%(levelname)s:  [%(funcName)s] %(message)s"
+            )
 
         if args.quantity is not None:
             self.quantity = args.quantity
@@ -47,7 +65,7 @@ class Options:
 
         if args.cache is not None:
             self.dir_cache = os.path.expanduser(args.cache)
-        
+
         if args.condition is not None:
             self.max_files = args.condition
 
