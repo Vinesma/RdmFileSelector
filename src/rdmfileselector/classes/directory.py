@@ -4,11 +4,11 @@
 import logging
 from os import listdir
 from random import sample
-from json import JSONEncoder
 from rdmfileselector.classes.file import File
 
 
-class Directory(JSONEncoder):
+# pylint: disable=logging-fstring-interpolation
+class Directory:
     """Represents one directory"""
 
     def __init__(self, path, files=None):
@@ -30,11 +30,9 @@ class Directory(JSONEncoder):
     def __len__(self):
         return len(self.files)
 
-    def __dict__(self):
-        return {"path": self.path, "files": [_file.__dict__() for _file in self.files]}
-
-    def default(self, o):
-        return object.__dict__
+    def to_dict(self):
+        """Transform this instance into a dict"""
+        return {"path": self.path, "files": [_file.to_dict() for _file in self.files]}
 
     def increase_all_file_scores(self):
         """Increase score for all files in this directory."""
@@ -142,7 +140,8 @@ class Directory(JSONEncoder):
         files = listdir(directory_path)
 
         logging.info(f"Found {len(files)} files.")
-        [logging.debug(f"File: '{_file}'") for _file in files]
+        for _file in files:
+            logging.debug(f"File: '{_file}'")
 
         return Directory(
             path=directory_path, files=[{"name": _file} for _file in files]

@@ -6,6 +6,7 @@ import os
 import argparse
 
 
+# pylint: disable=logging-fstring-interpolation
 class Options:
     """Initialize argument based options and logging."""
 

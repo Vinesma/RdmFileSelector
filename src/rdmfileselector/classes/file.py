@@ -6,6 +6,7 @@ import logging
 from os import path
 
 
+# pylint: disable=logging-fstring-interpolation
 class File:
     """Represents one file."""
 
@@ -21,7 +22,8 @@ class File:
 
         self.score = score
 
-    def __dict__(self):
+    def to_dict(self):
+        """Transform this instance into a dict"""
         return {"name": self.name, "score": self.score}
 
     def copy(self, dir_to):

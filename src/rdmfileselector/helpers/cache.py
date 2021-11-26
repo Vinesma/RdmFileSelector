@@ -22,7 +22,7 @@ class Cache:
         with open(
             os.path.join(self.dir_cache, self.file_cache), "w", encoding="utf-8"
         ) as _file:
-            _file.write(json.dumps(directories, cls=Directory))
+            _file.write(json.dumps([directory.to_dict() for directory in directories]))
 
         logging.info("Save to cache successful!")
 
